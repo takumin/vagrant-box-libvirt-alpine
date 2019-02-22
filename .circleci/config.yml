@@ -10,6 +10,9 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Git Submodules
+          command: git submodule update --init --recursive
+      - run:
           name: Creating Base Image - x86_64
           command: ./alpine-chroot-install/alpine-chroot-install
           environment:
