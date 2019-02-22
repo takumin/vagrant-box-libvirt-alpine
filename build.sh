@@ -1,7 +1,7 @@
 #!/bin/sh
 # vim: set noet :
 
-set -eu
+set -eux
 
 # Commandline Options
 while getopts 'a:b:d:i:k:m:p:r:t:hv' OPTION; do
