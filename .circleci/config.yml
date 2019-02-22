@@ -10,10 +10,12 @@ jobs:
       - run:
           name: Install Required Packages
           command: |
+            sudo apt-get -q update
+            sudo apt-get -q dist-upgrade
+            sudo DEBIAN_FRONTEND="noninteractive" DEBIAN_PRIORITY="critical" apt-get -q install -y --no-install-recommends qemu parted pixz
             echo 'deb http://archive.ubuntu.com/ubuntu artful main universe' | sudo tee /etc/apt/sources.list.d/ubuntu-artful.list
             sudo apt-get -q update
             sudo DEBIAN_FRONTEND="noninteractive" DEBIAN_PRIORITY="critical" apt-get -q install -y --no-install-recommends --target-release artful qemu-user-static
-            sudo DEBIAN_FRONTEND="noninteractive" DEBIAN_PRIORITY="critical" apt-get -q install -y --no-install-recommends qemu parted pixz
       - run:
           name: Creating Base Image - x86_64
           command: ARCH="x86_64" ./build.sh
