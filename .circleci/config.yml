@@ -1,8 +1,7 @@
 version: 2
 jobs:
   build:
-    docker:
-      - image: debian:stretch
+    machine: true
     environment:
       ALPINE_BRANCH: v3.9
       ALPINE_MIRROR: http://dl-cdn.alpinelinux.org/alpine
