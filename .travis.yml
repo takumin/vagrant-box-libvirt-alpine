@@ -1,0 +1,20 @@
+sudo: required
+dist: trusty
+language: minimal
+env:
+  global:
+    - ALPINE_BRANCH="v3.9"
+    - ALPINE_MIRROR="http://dl-cdn.alpinelinux.org/alpine"
+    - ALPINE_PACKAGES="build-base ca-certificates ssl_client"
+  matrix:
+    - ARCH="x86_64"
+    - ARCH="armhf"
+    - ARCH="aarch64"
+install:
+  - sudo ./alpine-chroot-install/alpine-chroot-install
+script:
+  - /alpine/enter-chroot uname -a
+  - /alpine/enter-chroot env
+  - /alpine/enter-chroot -u $USER env
+  - sudo /alpine/enter-chroot -u $USER env
+  - test "$(/alpine/enter-chroot printf %s! 'Hello, world')" = 'Hello, world!'
