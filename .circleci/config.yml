@@ -8,8 +8,10 @@ jobs:
           name: Git Submodules
           command: git submodule update --init --recursive
       - run:
-          name: Required Packages
-          command: sudo apt-get install -y qemu-user-static
+          name: Install Required Packages
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y qemu-user-static
       - run:
           name: Creating Base Image - x86_64
           command: >-
