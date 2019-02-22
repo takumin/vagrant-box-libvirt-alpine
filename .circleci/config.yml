@@ -17,10 +17,10 @@ jobs:
             sudo DEBIAN_FRONTEND="noninteractive" DEBIAN_PRIORITY="critical" apt-get -q install -y --no-install-recommends --target-release artful qemu-user-static
       - run:
           name: Creating Base Image - x86_64
-          command: ARCH="x86_64" ./build.sh
+          command: sudo ARCH="x86_64" ./build.sh
       - run:
           name: Creating Base Image - armhf
-          command: ARCH="armhf" ./build.sh
+          command: sudo ARCH="armhf" ./build.sh
       - run:
           name: Creating Base Image - aarch64
-          command: ARCH="aarch64" ./build.sh
+          command: sudo ARCH="aarch64" ./build.sh

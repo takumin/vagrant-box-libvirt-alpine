@@ -46,39 +46,31 @@ fi
 qemu-img create -q -f qcow2 "${BUILD_DIR}/box.img" 32G
 
 # Connect Disk Image
-sudo qemu-nbd -c "${BLOCK_DEV}" "${BUILD_DIR}/box.img"
+qemu-nbd -c "${BLOCK_DEV}" "${BUILD_DIR}/box.img"
 
 # Create Partition Table
-sudo parted -msa opt "${BLOCK_DEV}" -- mklabel msdos
+parted -msa opt "${BLOCK_DEV}" -- mklabel msdos
 
 # Create Partition
-sudo parted -msa opt "${BLOCK_DEV}" -- mkpart primary 1 -1
+parted -msa opt "${BLOCK_DEV}" -- mkpart primary 1 -1
 
 # Configure Partition
-sudo parted -msa opt "${BLOCK_DEV}" -- set 1 boot on
+parted -msa opt "${BLOCK_DEV}" -- set 1 boot on
 
 # Formart Partition
-sudo mkfs.xfs -q -L "RootFs" "${BLOCK_DEV}p1"
+mkfs.xfs -q -L "RootFs" "${BLOCK_DEV}p1"
 
 # Mount Partition
-sudo mount "${BLOCK_DEV}p1" "${CHROOT_DIR}"
+mount "${BLOCK_DEV}p1" "${CHROOT_DIR}"
 
 # Build Alpine Base Image
-sudo \
-  ALPINE_BRANCH="${ALPINE_BRANCH}" \
-  ALPINE_MIRROR="${ALPINE_MIRROR}" \
-  ALPINE_PACKAGES="${ALPINE_PACKAGES}" \
-  ARCH="${ARCH}" \
-  CHROOT_DIR="${CHROOT_DIR}" \
-  CHROOT_KEEP_VARS="${CHROOT_KEEP_VARS}" \
-  EXTRA_REPOS="${EXTRA_REPOS}" \
-  ./alpine-chroot-install/alpine-chroot-install
+./alpine-chroot-install/alpine-chroot-install
 
 # Install Boot Recode
 "$CHROOT_DIR/enter-chroot" grub-install --target=i386-pc "${BLOCK_DEV}"
 
 # Disconnect Disk Image
-sudo sh -c "qemu-nbd -d ${BLOCK_DEV} > /dev/null"
+qemu-nbd -d "${BLOCK_DEV}" > /dev/null
 
 # Create Vagrant Configuration File
 cat > "${BUILD_DIR}/Vagrantfile" << '__EOF__'
