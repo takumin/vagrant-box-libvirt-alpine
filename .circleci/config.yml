@@ -11,7 +11,6 @@ jobs:
           name: Install Required Packages
           command: |
             sudo apt-get -q update
-            sudo apt-get -q dist-upgrade
             sudo DEBIAN_FRONTEND="noninteractive" DEBIAN_PRIORITY="critical" apt-get -q install -y --no-install-recommends qemu parted pixz
             echo 'deb http://archive.ubuntu.com/ubuntu artful main universe' | sudo tee /etc/apt/sources.list.d/ubuntu-artful.list
             sudo apt-get -q update
