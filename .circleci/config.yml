@@ -25,7 +25,7 @@ jobs:
             ALPINE_PACKAGES="build-base ca-certificates ssl_client"
             ARCH="x86_64"
             CHROOT_DIR="/alpine-x86_64"
-            CHROOT_KEEP_VARS="ARCH CI QEMU_EMULATOR CIRCLE__.*"
+            CHROOT_KEEP_VARS="ARCH CI QEMU_EMULATOR CIRCLE_.*"
             ./alpine-chroot-install/alpine-chroot-install
       - run:
           name: Creating Base Image - armhf
@@ -36,7 +36,7 @@ jobs:
             ALPINE_PACKAGES="build-base ca-certificates ssl_client"
             ARCH="armhf"
             CHROOT_DIR="/alpine-armhf"
-            CHROOT_KEEP_VARS="ARCH CI QEMU_EMULATOR CIRCLE__.*"
+            CHROOT_KEEP_VARS="ARCH CI QEMU_EMULATOR CIRCLE_.*"
             ./alpine-chroot-install/alpine-chroot-install
       - run:
           name: Creating Base Image - aarch64
@@ -47,5 +47,5 @@ jobs:
             ALPINE_PACKAGES="build-base ca-certificates ssl_client"
             ARCH="aarch64"
             CHROOT_DIR="/alpine-aarch64"
-            CHROOT_KEEP_VARS="ARCH CI QEMU_EMULATOR CIRCLE__.*"
+            CHROOT_KEEP_VARS="ARCH CI QEMU_EMULATOR CIRCLE_.*"
             ./alpine-chroot-install/alpine-chroot-install
