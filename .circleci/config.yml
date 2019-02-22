@@ -10,8 +10,12 @@ jobs:
       - run:
           name: Install Required Packages
           command: |
-            sudo apt-get update
-            sudo apt-get install -y qemu-user-static
+            echo "deb http://archive.ubuntu.com/ubuntu bionic main universe" | sudo tee /etc/apt/sources.list.d/ubuntu-bionic.list
+            echo 'Package: *'            | sudo tee    /etc/apt/preferences.d/ubuntu-bionic
+            echo 'Pin: release n=bionic' | sudo tee -a /etc/apt/preferences.d/ubuntu-bionic
+            echo 'Pin-Priority: -1'      | sudo tee -a /etc/apt/preferences.d/ubuntu-bionic
+            sudo apt-get -q update -o Dir::Etc::sourcelist="/etc/apt/sources.list.d/ubuntu-bionic.list"
+            sudo apt-get -q install -y --no-install-recommends --target-release bionic qemu-user-static
       - run:
           name: Creating Base Image - x86_64
           command: >-
