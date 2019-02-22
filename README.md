@@ -1,2 +1,1 @@
-# vagrant-box-libvirt-alpine [![Build Status](https://travis-ci.org/takumin/vagrant-box-libvirt-alpine.svg?branch=master)](https://travis-ci.org/takumin/vagrant-box-libvirt-alpine)
-Vagrant for Libvirt in Alpine Linux
+# vagrant-box-libvirt-alpine [![TravisCI](https://travis-ci.org/takumin/vagrant-box-libvirt-alpine.svg?branch=master)](https://travis-ci.org/takumin/vagrant-box-libvirt-alpine) [![CircleCI](https://circleci.com/gh/takumin/vagrant-box-libvirt-alpine.svg?style=svg)](https://circleci.com/gh/takumin/vagrant-box-libvirt-alpine)
