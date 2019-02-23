@@ -76,6 +76,8 @@ sgdisk      -n 2::+512M -c 2:"Efi"  -t 2:ef00 "${BLOCK_DEV}"
 # Create Root Partition
 sgdisk      -n 3::-1    -c 3:"Root" -t 3:8300 "${BLOCK_DEV}"
 
+ls -la "${BUILD_DIR}"
+
 # Format EFI System Partition
 mkfs.vfat -F 32 -n "EfiFs" "${BLOCK_DEV}p1"
 
