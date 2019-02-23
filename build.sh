@@ -32,6 +32,9 @@ done
 : ${EXTRA_REPOS:=}
 : ${TEMP_DIR:=$(mktemp -d || echo /tmp/alpine)}
 
+# Load Kernel Module
+lsmod | grep -qs nbd || modprobe nbd
+
 # Create Build Directory
 if [ ! -d "${BUILD_DIR}" ]; then
 	mkdir -p "${BUILD_DIR}"
