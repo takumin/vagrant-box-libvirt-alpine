@@ -3,7 +3,10 @@
 
 set -eux
 
-# Commandline Options
+################################################################################
+# Command Line Options
+################################################################################
+
 while getopts 'a:b:d:i:k:m:p:r:t:hv' OPTION; do
 	case "$OPTION" in
 		a) ARCH="$OPTARG";;
@@ -18,10 +21,10 @@ while getopts 'a:b:d:i:k:m:p:r:t:hv' OPTION; do
 	esac
 done
 
+################################################################################
 # Default Environment Variables
-: ${BUILD_DIR:="build"}
-: ${MOUNT_DIR:="mount"}
-: ${BLOCK_DEV:="/dev/nbd0"}
+################################################################################
+
 : ${ALPINE_BRANCH:="v3.9"}
 : ${ALPINE_MIRROR:="http://dl-cdn.alpinelinux.org/alpine"}
 : ${ALPINE_PACKAGES:="build-base ca-certificates ssl_client"}
@@ -31,19 +34,26 @@ done
 : ${CHROOT_KEEP_VARS:="ARCH CI QEMU_EMULATOR CIRCLE_.* TRAVIS_.*"}
 : ${EXTRA_REPOS:=}
 : ${TEMP_DIR:=$(mktemp -d || echo /tmp/alpine)}
+: ${BUILD_DIR:="${TEMP_DIR}/build"}
+: ${BLOCK_DEV:="/dev/nbd0"}
+
+################################################################################
+# Initialize
+################################################################################
 
 # Load Kernel Module
 lsmod | grep -qs nbd || modprobe nbd
 
-# Create Build Directory
-if [ ! -d "${BUILD_DIR}" ]; then
-	mkdir -p "${BUILD_DIR}"
-fi
+dpkg -l | awk '{print $2}' | grep -qs '^gdisk$'      || apt-get -y --no-install-recommends install gdisk
+dpkg -l | awk '{print $2}' | grep -qs '^dosfstools$' || apt-get -y --no-install-recommends install dosfstools
+dpkg -l | awk '{print $2}' | grep -qs '^e2fsprogs$'  || apt-get -y --no-install-recommends install e2fsprogs
 
-# Create Chroot Directory
-if [ ! -d "${CHROOT_DIR}" ]; then
-	mkdir -p "${CHROOT_DIR}"
-fi
+################################################################################
+# Disk
+################################################################################
+
+# Create Build Directory
+mkdir -p "${BUILD_DIR}"
 
 # Create Disk Image
 qemu-img create -q -f qcow2 "${BUILD_DIR}/box.img" 32G
@@ -51,26 +61,47 @@ qemu-img create -q -f qcow2 "${BUILD_DIR}/box.img" 32G
 # Connect Disk Image
 qemu-nbd -c "${BLOCK_DEV}" "${BUILD_DIR}/box.img"
 
-# Create Partition Table
-parted -msa opt "${BLOCK_DEV}" -- mklabel msdos
+# Clear Partition Table
+sgdisk -Z "${BLOCK_DEV}"
 
-# Create Partition
-parted -msa opt "${BLOCK_DEV}" -- mkpart primary 1 -1
+# Create GPT Partition Table
+sgdisk -o "${BLOCK_DEV}"
 
-# Configure Partition
-parted -msa opt "${BLOCK_DEV}" -- set 1 boot on
+# Create BIOS Partition
+sgdisk -a 1 -n 1::2047  -c 1:"Bios" -t 1:ef02 "${BLOCK_DEV}"
 
-# Formart Partition
-mkfs.xfs -q -L "RootFs" "${BLOCK_DEV}p1"
+# Create EFI Partition
+sgdisk      -n 2::+512M -c 2:"Efi"  -t 2:ef00 "${BLOCK_DEV}"
+
+# Create Root Partition
+sgdisk      -n 3::-1    -c 3:"Root" -t 3:8300 "${BLOCK_DEV}"
+
+# Format EFI System Partition
+mkfs.vfat -F 32 -n "EfiFs" "${BLOCK_DEV}p1"
+
+# Format Root File System Partition
+mkfs.ext4 -f -L "RootFs" "${BLOCK_DEV}p2"
 
 # Mount Partition
-mount "${BLOCK_DEV}p1" "${CHROOT_DIR}"
+mkdir -p "${CHROOT_DIR}"
+mount "${BLOCK_DEV}p2" "${CHROOT_DIR}"
+
+# Mount EFI System Partition
+mkdir -p "${CHROOT_DIR}/boot/efi"
+mount "${BLOCK_DEV}p1" "${CHROOT_DIR}/boot/efi"
+
+################################################################################
+# Chroot
+################################################################################
 
 # Build Alpine Base Image
 ./alpine-chroot-install/alpine-chroot-install
 
 # Install Boot Recode
-"$CHROOT_DIR/enter-chroot" grub-install --target=i386-pc "${BLOCK_DEV}"
+"${CHROOT_DIR}/enter-chroot" grub-install --target=i386-pc "${BLOCK_DEV}"
+
+# Unmount RootFs
+awk '{print $2}' /proc/mounts | grep -s "${CHROOT_DIR}/" | sort -r | xargs --no-run-if-empty umount
 
 # Disconnect Disk Image
 qemu-nbd -d "${BLOCK_DEV}" > /dev/null
