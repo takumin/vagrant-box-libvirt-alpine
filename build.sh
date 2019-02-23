@@ -115,11 +115,11 @@ export TEMP_DIR="${TEMP_DIR}"
 # Build Alpine Base Image
 ./alpine-chroot-install/alpine-chroot-install
 
-# Unmount RootFs
-awk '{print $2}' /proc/mounts | grep -s "${CHROOT_DIR}" | sort -r | xargs --no-run-if-empty umount
-
 # Install Bios Boot Recode
 ${CHROOT_DIR}/enter-chroot grub-install --target=i386-pc "${BLOCK_DEV}"
+
+# Unmount RootFs
+awk '{print $2}' /proc/mounts | grep -s "${CHROOT_DIR}" | sort -r | xargs --no-run-if-empty umount
 
 # Disconnect Disk Image
 qemu-nbd -d "${BLOCK_DEV}" > /dev/null
