@@ -87,8 +87,6 @@ mkfs.vfat -F 32 -n "EfiFs" "${BLOCK_DEV}p1"
 # Format Root File System Partition
 mkfs.ext4 -L "RootFs" "${BLOCK_DEV}p2"
 
-ls -la "${BUILD_DIR}"
-
 # Mount Partition
 mkdir -p "${CHROOT_DIR}"
 mount "${BLOCK_DEV}p2" "${CHROOT_DIR}"
@@ -104,8 +102,10 @@ mount "${BLOCK_DEV}p1" "${CHROOT_DIR}/boot/efi"
 # Build Alpine Base Image
 ./alpine-chroot-install/alpine-chroot-install
 
+ls -la "${CHROOT_DIR}"
+
 # Install Bios Boot Recode
-"${CHROOT_DIR}/enter-chroot" grub-install --target=i386-pc "${BLOCK_DEV}"
+${CHROOT_DIR}/enter-chroot grub-install --target=i386-pc "${BLOCK_DEV}"
 
 ################################################################################
 # Cleanup
