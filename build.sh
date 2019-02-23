@@ -27,7 +27,7 @@ done
 
 : ${ALPINE_BRANCH:="v3.9"}
 : ${ALPINE_MIRROR:="http://dl-cdn.alpinelinux.org/alpine"}
-: ${ALPINE_PACKAGES:="build-base ca-certificates ssl_client"}
+: ${ALPINE_PACKAGES:="build-base ca-certificates ssl_client grub-bios grub-efi"}
 : ${ARCH:=}
 : ${BIND_DIR:=}
 : ${CHROOT_DIR:="/alpine-build-${ARCH}"}
@@ -44,9 +44,14 @@ done
 # Load Kernel Module
 lsmod | grep -qs nbd || modprobe nbd
 
+# Install Required Packages
 dpkg -l | awk '{print $2}' | grep -qs '^gdisk$'      || apt-get -y --no-install-recommends install gdisk
 dpkg -l | awk '{print $2}' | grep -qs '^dosfstools$' || apt-get -y --no-install-recommends install dosfstools
 dpkg -l | awk '{print $2}' | grep -qs '^e2fsprogs$'  || apt-get -y --no-install-recommends install e2fsprogs
+dpkg -l | awk '{print $2}' | grep -qs '^pixz$'       || apt-get -y --no-install-recommends install pixz
+
+# Unmount RootFs
+awk '{print $2}' /proc/mounts | grep -s "${CHROOT_DIR}" | sort -r | xargs --no-run-if-empty umount
 
 ################################################################################
 # Disk
@@ -76,13 +81,13 @@ sgdisk      -n 2::+512M -c 2:"Efi"  -t 2:ef00 "${BLOCK_DEV}"
 # Create Root Partition
 sgdisk      -n 3::-1    -c 3:"Root" -t 3:8300 "${BLOCK_DEV}"
 
-ls -la "${BUILD_DIR}"
-
 # Format EFI System Partition
 mkfs.vfat -F 32 -n "EfiFs" "${BLOCK_DEV}p1"
 
 # Format Root File System Partition
 mkfs.ext4 -L "RootFs" "${BLOCK_DEV}p2"
+
+ls -la "${BUILD_DIR}"
 
 # Mount Partition
 mkdir -p "${CHROOT_DIR}"
@@ -99,14 +104,22 @@ mount "${BLOCK_DEV}p1" "${CHROOT_DIR}/boot/efi"
 # Build Alpine Base Image
 ./alpine-chroot-install/alpine-chroot-install
 
-# Install Boot Recode
+# Install Bios Boot Recode
 "${CHROOT_DIR}/enter-chroot" grub-install --target=i386-pc "${BLOCK_DEV}"
 
+################################################################################
+# Cleanup
+################################################################################
+
 # Unmount RootFs
-awk '{print $2}' /proc/mounts | grep -s "${CHROOT_DIR}/" | sort -r | xargs --no-run-if-empty umount
+awk '{print $2}' /proc/mounts | grep -s "${CHROOT_DIR}" | sort -r | xargs --no-run-if-empty umount
 
 # Disconnect Disk Image
 qemu-nbd -d "${BLOCK_DEV}" > /dev/null
+
+################################################################################
+# Vagrant Box
+################################################################################
 
 # Create Vagrant Configuration File
 cat > "${BUILD_DIR}/Vagrantfile" << '__EOF__'
