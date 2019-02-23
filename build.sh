@@ -80,7 +80,7 @@ sgdisk      -n 3::-1    -c 3:"Root" -t 3:8300 "${BLOCK_DEV}"
 mkfs.vfat -F 32 -n "EfiFs" "${BLOCK_DEV}p1"
 
 # Format Root File System Partition
-mkfs.ext4 -f -L "RootFs" "${BLOCK_DEV}p2"
+mkfs.ext4 -L "RootFs" "${BLOCK_DEV}p2"
 
 # Mount Partition
 mkdir -p "${CHROOT_DIR}"
