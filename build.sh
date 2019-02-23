@@ -99,6 +99,17 @@ mount "${BLOCK_DEV}p1" "${CHROOT_DIR}/boot/efi"
 # Chroot
 ################################################################################
 
+# Export Environment Variables
+export ALPINE_BRANCH="${ALPINE_BRANCH}"
+export ALPINE_MIRROR="${ALPINE_MIRROR}"
+export ALPINE_PACKAGES="${ALPINE_PACKAGES}"
+export ARCH="${ARCH}"
+export BIND_DIR="${BIND_DIR}"
+export CHROOT_DIR="${CHROOT_DIR}"
+export CHROOT_KEEP_VARS="${CHROOT_KEEP_VARS}"
+export EXTRA_REPOS="${EXTRA_REPOS}"
+export TEMP_DIR="${TEMP_DIR}"
+
 # Build Alpine Base Image
 ./alpine-chroot-install/alpine-chroot-install
 
