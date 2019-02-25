@@ -82,20 +82,18 @@ sgdisk      -n 2::+512M -c 2:"Efi"  -t 2:ef00 "${BLOCK_DEV}"
 sgdisk      -n 3::-1    -c 3:"Root" -t 3:8300 "${BLOCK_DEV}"
 
 # Format EFI System Partition
-mkfs.vfat -F 32 -n "EfiFs" "${BLOCK_DEV}p1"
+mkfs.vfat -F 32 -n "EfiFs" "${BLOCK_DEV}p2"
 
 # Format Root File System Partition
-mkfs.ext4 -L "RootFs" "${BLOCK_DEV}p2"
-
-ls -la /dev/nbd0*
+mkfs.ext4 -L "RootFs" "${BLOCK_DEV}p3"
 
 # Mount Partition
 mkdir -p "${CHROOT_DIR}"
-mount "${BLOCK_DEV}p2" "${CHROOT_DIR}"
+mount "${BLOCK_DEV}p3" "${CHROOT_DIR}"
 
 # Mount EFI System Partition
 mkdir -p "${CHROOT_DIR}/boot/efi"
-mount "${BLOCK_DEV}p1" "${CHROOT_DIR}/boot/efi"
+mount "${BLOCK_DEV}p2" "${CHROOT_DIR}/boot/efi"
 
 ################################################################################
 # Chroot
