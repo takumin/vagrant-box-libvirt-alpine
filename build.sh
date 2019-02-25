@@ -95,6 +95,12 @@ mount "${BLOCK_DEV}p3" "${CHROOT_DIR}"
 mkdir -p "${CHROOT_DIR}/boot/efi"
 mount "${BLOCK_DEV}p2" "${CHROOT_DIR}/boot/efi"
 
+# Update Device Map
+grub-mkdevicemap
+
+ls -la ${BLOCK_DEV}*
+ls -la ${BUILD_DIR}
+
 ################################################################################
 # Chroot
 ################################################################################
