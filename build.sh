@@ -98,8 +98,8 @@ mount "${BLOCK_DEV}p2" "${CHROOT_DIR}/boot/efi"
 # Update Device Map
 grub-mkdevicemap
 
-ls -la ${BLOCK_DEV}*
-ls -la ${BUILD_DIR}
+ls -lah ${BLOCK_DEV}*
+ls -lah ${BUILD_DIR}
 
 ################################################################################
 # Chroot
@@ -118,6 +118,8 @@ export TEMP_DIR="${TEMP_DIR}"
 
 # Build Alpine Base Image
 ./alpine-chroot-install/alpine-chroot-install
+
+${CHROOT_DIR}/enter-chroot ls -lah /boot
 
 # Install Bios Boot Recode
 ${CHROOT_DIR}/enter-chroot grub-install --target=i386-pc "${BLOCK_DEV}"
