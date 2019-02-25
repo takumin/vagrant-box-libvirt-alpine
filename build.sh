@@ -110,7 +110,7 @@ export TEMP_DIR="${TEMP_DIR}"
 ./alpine-chroot-install/alpine-chroot-install
 
 # Install Bios Boot Recode
-${CHROOT_DIR}/enter-chroot grub-install --force --target=i386-pc "${BLOCK_DEV}"
+${CHROOT_DIR}/enter-chroot grub-install --recheck --target=i386-pc "${BLOCK_DEV}"
 ${CHROOT_DIR}/enter-chroot grub-mkconfig -o /boot/grub/grub.cfg
 
 # Unmount RootFs
