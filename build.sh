@@ -132,7 +132,8 @@ case "${ARCH}" in
 		;;
 	"aarch64" )
 		${CHROOT_DIR}/enter-chroot apk add --no-progress --no-cache grub-efi
-		grub-install --recheck --target=arm64-efi --directory="${CHROOT_DIR}/usr/lib/grub/arm64-efi" --boot-directory="${CHROOT_DIR}/boot" --efi-directory="${CHROOT_DIR}/boot/efi"
+		# grub-install --recheck --target=arm64-efi --directory="${CHROOT_DIR}/usr/lib/grub/arm64-efi" --boot-directory="${CHROOT_DIR}/boot" --efi-directory="${CHROOT_DIR}/boot/efi"
+		${CHROOT_DIR}/enter-chroot grub-install --recheck --target=arm64-efi --efi-directory="/boot/efi"
 		${CHROOT_DIR}/enter-chroot grub-mkconfig -o /boot/grub/grub.cfg
 		;;
 esac
