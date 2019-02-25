@@ -114,13 +114,15 @@ export TEMP_DIR="${TEMP_DIR}"
 # Install Bios Boot Recode
 case "${ARCH}" in
 	"x86_64" )
-		grub-install --recheck --target=i386-pc --root-directory="${CHROOT_DIR}" "${BLOCK_DEV}"
-		grub-install --recheck --target=x86_64-efi --root-directory="${CHROOT_DIR}" --efi-directory=/boot/efi
+		${CHROOT_DIR}/enter-chroot apk add --no-cache grub-bios grub-efi
+		${CHROOT_DIR}/enter-chroot grub-install --recheck --target=i386-pc "${BLOCK_DEV}"
+		${CHROOT_DIR}/enter-chroot grub-install --recheck --target=x86_64-efi --efi-directory=/boot/efi
 		;;
 	"aarch64" )
+		${CHROOT_DIR}/enter-chroot apk add --no-cache grub-efi
+		${CHROOT_DIR}/enter-chroot grub-install --recheck --target=x86_64-efi --efi-directory=/boot/efi
 		;;
 esac
-# grub-mkconfig -o /boot/grub/grub.cfg
 
 # Unmount RootFs
 awk '{print $2}' /proc/mounts | grep -s "${CHROOT_DIR}" | sort -r | xargs --no-run-if-empty umount
