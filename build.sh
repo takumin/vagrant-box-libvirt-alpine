@@ -129,15 +129,17 @@ sync;sync;sync;
 case "${ARCH}" in
 	"x86_64" )
 		${CHROOT_DIR}/enter-chroot apk add --no-progress --no-cache grub-bios grub-efi
-		${CHROOT_DIR}/enter-chroot grub-install --recheck --target=i386-pc "${BLOCK_DEV}"
-		${CHROOT_DIR}/enter-chroot grub-install --recheck --target=x86_64-efi --efi-directory="/boot/efi"
+		${CHROOT_DIR}/enter-chroot grub-install -v --recheck --target=i386-pc "${BLOCK_DEV}"
+		${CHROOT_DIR}/enter-chroot grub-install -v --recheck --target=x86_64-efi --efi-directory="/boot/efi"
 		# grub-install --recheck --target=i386-pc --directory="${CHROOT_DIR}" --boot-directory="${CHROOT_DIR}/boot" "${BLOCK_DEV}"
 		# grub-install --recheck --target=x86_64-efi --directory="${CHROOT_DIR}" --boot-directory="${CHROOT_DIR}/boot" --efi-directory="${CHROOT_DIR}/boot/efi"
+		${CHROOT_DIR}/enter-chroot grub-mkconfig -o /boot/grub/grub.cfg
 		;;
 	"aarch64" )
 		${CHROOT_DIR}/enter-chroot apk add --no-progress --no-cache grub-efi
-		${CHROOT_DIR}/enter-chroot grub-install --recheck --target=x86_64-efi --efi-directory="/boot/efi"
+		${CHROOT_DIR}/enter-chroot grub-install -v --recheck --target=x86_64-efi --efi-directory="/boot/efi"
 		# grub-install --recheck --target=x86_64-efi --directory="${CHROOT_DIR}" --boot-directory="${CHROOT_DIR}/boot" --efi-directory="${CHROOT_DIR}/boot/efi"
+		${CHROOT_DIR}/enter-chroot grub-mkconfig -o /boot/grub/grub.cfg
 		;;
 esac
 
