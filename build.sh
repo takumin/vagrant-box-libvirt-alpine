@@ -111,15 +111,29 @@ export TEMP_DIR="${TEMP_DIR}"
 # Build Alpine Base Image
 ./alpine-chroot-install/alpine-chroot-install
 
+# Symlink Mount Table
+ln -s /proc/self/mounts "${CHROOT_DIR}/etc/mtab"
+
+# Get Root File System UUID
+root_uuid="$(blk_uuid "${BLOCK_DEV}p3")"
+uefi_uuid="$(blk_uuid "${BLOCK_DEV}p2")"
+
+cat > "${CHROOT_DIR}/etc/fstab" <<- __EOF__
+# <file system> <mount point>   <type>  <options>         <dump>  <pass>
+UUID=$root_uuid /               ext4    noatime           0       1
+UUID=$uefi_uuid /boot/efi       vfat    umask=0077        0       1
+tmpfs           /tmp            tmpfs   nodev,nosuid      0       0
+__EOF__
+
 # Install Bios Boot Recode
 case "${ARCH}" in
 	"x86_64" )
-		${CHROOT_DIR}/enter-chroot apk add --no-cache grub-bios grub-efi
+		${CHROOT_DIR}/enter-chroot apk add --no-progress --no-cache grub-bios grub-efi
 		${CHROOT_DIR}/enter-chroot grub-install --recheck --target=i386-pc "${BLOCK_DEV}"
 		${CHROOT_DIR}/enter-chroot grub-install --recheck --target=x86_64-efi --efi-directory=/boot/efi
 		;;
 	"aarch64" )
-		${CHROOT_DIR}/enter-chroot apk add --no-cache grub-efi
+		${CHROOT_DIR}/enter-chroot apk add --no-progress --no-cache grub-efi
 		${CHROOT_DIR}/enter-chroot grub-install --recheck --target=x86_64-efi --efi-directory=/boot/efi
 		;;
 esac
