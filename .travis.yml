@@ -1,5 +1,15 @@
 dist: xenial
 language: minimal
+addons:
+  apt:
+    packages:
+    - qemu
+    - gdisk
+    - dosfstools
+    - e2fsprogs
+    - pixz
+    - grub-pc-bin
+    - grub-efi-amd64-bin
 env:
   global:
     - ALPINE_BRANCH="v3.9"
@@ -8,11 +18,5 @@ env:
   matrix:
     - ARCH="x86_64"
     - ARCH="aarch64"
-install:
-  - sudo ./alpine-chroot-install/alpine-chroot-install
 script:
-  - /alpine/enter-chroot uname -a
-  - /alpine/enter-chroot env
-  - /alpine/enter-chroot -u $USER env
-  - sudo /alpine/enter-chroot -u $USER env
-  - test "$(/alpine/enter-chroot printf %s! 'Hello, world')" = 'Hello, world!'
+  - sudo ./build.sh
