@@ -27,7 +27,7 @@ done
 
 : ${ALPINE_BRANCH:="v3.9"}
 : ${ALPINE_MIRROR:="http://dl-cdn.alpinelinux.org/alpine"}
-: ${ALPINE_PACKAGES:="build-base ca-certificates ssl_client grub-bios grub-efi"}
+: ${ALPINE_PACKAGES:="build-base ca-certificates ssl_client"}
 : ${ARCH:=}
 : ${BIND_DIR:=}
 : ${CHROOT_DIR:="/alpine-build-${ARCH}"}
@@ -45,10 +45,12 @@ done
 lsmod | grep -qs nbd || modprobe nbd
 
 # Install Required Packages
-dpkg -l | awk '{print $2}' | grep -qs '^gdisk$'      || apt-get -y --no-install-recommends install gdisk
-dpkg -l | awk '{print $2}' | grep -qs '^dosfstools$' || apt-get -y --no-install-recommends install dosfstools
-dpkg -l | awk '{print $2}' | grep -qs '^e2fsprogs$'  || apt-get -y --no-install-recommends install e2fsprogs
-dpkg -l | awk '{print $2}' | grep -qs '^pixz$'       || apt-get -y --no-install-recommends install pixz
+dpkg -l | awk '{print $1}' | grep -qs '^gdisk$'              || apt-get -y --no-install-recommends install gdisk
+dpkg -l | awk '{print $1}' | grep -qs '^dosfstools$'         || apt-get -y --no-install-recommends install dosfstools
+dpkg -l | awk '{print $1}' | grep -qs '^e2fsprogs$'          || apt-get -y --no-install-recommends install e2fsprogs
+dpkg -l | awk '{print $1}' | grep -qs '^pixz$'               || apt-get -y --no-install-recommends install pixz
+dpkg -l | awk '{print $1}' | grep -qs '^grub-pc-bin$'        || apt-get -y --no-install-recommends install grub-pc-bin
+dpkg -l | awk '{print $1}' | grep -qs '^grub-efi-amd64-bin$' || apt-get -y --no-install-recommends install grub-efi-amd64-bin
 
 # Unmount RootFs
 awk '{print $2}' /proc/mounts | grep -s "${CHROOT_DIR}" | sort -r | xargs --no-run-if-empty umount
@@ -110,7 +112,14 @@ export TEMP_DIR="${TEMP_DIR}"
 ./alpine-chroot-install/alpine-chroot-install
 
 # Install Bios Boot Recode
-grub-install --recheck --root-directory="${CHROOT_DIR}" --target=i386-pc "${BLOCK_DEV}"
+case "${ARCH}" in
+	"x86_64" )
+		grub-install --recheck --target=i386-pc --root-directory="${CHROOT_DIR}" "${BLOCK_DEV}"
+		grub-install --recheck --target=x86_64-efi --root-directory="${CHROOT_DIR}" --efi-directory=/boot/efi
+		;;
+	"aarch64" )
+		;;
+esac
 # grub-mkconfig -o /boot/grub/grub.cfg
 
 # Unmount RootFs
