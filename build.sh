@@ -45,12 +45,10 @@ done
 lsmod | grep -qs nbd || modprobe nbd
 
 # Install Required Packages
-dpkg -l | awk '{print $2}' | grep -qs '^gdisk$'              || apt-get -y --no-install-recommends install gdisk
-dpkg -l | awk '{print $2}' | grep -qs '^dosfstools$'         || apt-get -y --no-install-recommends install dosfstools
-dpkg -l | awk '{print $2}' | grep -qs '^e2fsprogs$'          || apt-get -y --no-install-recommends install e2fsprogs
-dpkg -l | awk '{print $2}' | grep -qs '^pixz$'               || apt-get -y --no-install-recommends install pixz
-dpkg -l | awk '{print $2}' | grep -qs '^grub-pc-bin$'        || apt-get -y --no-install-recommends install grub-pc-bin
-dpkg -l | awk '{print $2}' | grep -qs '^grub-efi-amd64-bin$' || apt-get -y --no-install-recommends install grub-efi-amd64-bin
+dpkg -l | awk '{print $2}' | grep -qs '^gdisk$'      || apt-get -y --no-install-recommends install gdisk
+dpkg -l | awk '{print $2}' | grep -qs '^dosfstools$' || apt-get -y --no-install-recommends install dosfstools
+dpkg -l | awk '{print $2}' | grep -qs '^e2fsprogs$'  || apt-get -y --no-install-recommends install e2fsprogs
+dpkg -l | awk '{print $2}' | grep -qs '^pixz$'       || apt-get -y --no-install-recommends install pixz
 
 # Unmount RootFs
 awk '{print $2}' /proc/mounts | grep -s "${CHROOT_DIR}" | sort -r | xargs --no-run-if-empty umount
