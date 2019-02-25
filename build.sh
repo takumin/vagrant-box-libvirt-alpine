@@ -149,6 +149,9 @@ awk '{print $2}' /proc/mounts | grep -s "${CHROOT_DIR}" | sort -r | xargs --no-r
 # Disconnect Disk Image
 qemu-nbd -d "${BLOCK_DEV}" > /dev/null
 
+# Sync Disk
+sync;sync;sync;
+
 ################################################################################
 # Vagrant Box
 ################################################################################
