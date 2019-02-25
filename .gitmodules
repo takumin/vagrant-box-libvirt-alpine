@@ -1,3 +1,6 @@
 [submodule "alpine-chroot-install"]
 	path = alpine-chroot-install
 	url = https://github.com/alpinelinux/alpine-chroot-install.git
+[submodule "alpine-make-vm-image"]
+	path = alpine-make-vm-image
+	url = https://github.com/alpinelinux/alpine-make-vm-image.git
