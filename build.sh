@@ -111,9 +111,6 @@ export TEMP_DIR="${TEMP_DIR}"
 # Build Alpine Base Image
 ./alpine-chroot-install/alpine-chroot-install
 
-# Symlink Mount Table
-# ln -s /proc/self/mounts "${CHROOT_DIR}/etc/mtab"
-
 # Get Root File System UUID
 root_uuid="$(blk_id "${BLOCK_DEV}p3" | sed -En 's/.*UUID="([^"]+)".*/\1/p')"
 uefi_uuid="$(blk_id "${BLOCK_DEV}p2" | sed -En 's/.*UUID="([^"]+)".*/\1/p')"
@@ -125,21 +122,22 @@ UUID=$uefi_uuid /boot/efi       vfat    umask=0077        0       1
 tmpfs           /tmp            tmpfs   nodev,nosuid      0       0
 __EOF__
 
+# Sync Disk
+sync;sync;sync;
+
 # Install Bios Boot Recode
 case "${ARCH}" in
 	"x86_64" )
 		${CHROOT_DIR}/enter-chroot apk add --no-progress --no-cache grub-bios grub-efi
-		# ${CHROOT_DIR}/enter-chroot grub-install --recheck --target=i386-pc "${BLOCK_DEV}"
-		# ${CHROOT_DIR}/enter-chroot grub-install --recheck --target=x86_64-efi --efi-directory=/boot/efi
-		grub-install --recheck --target=i386-pc --boot-directory="${CHROOT_DIR}/boot" "${BLOCK_DEV}"
-		grub-install --recheck --target=x86_64-efi --boot-directory="${CHROOT_DIR}/boot" --efi-directory="${CHROOT_DIR}/boot/efi"
-		${CHROOT_DIR}/enter-chroot grub-mkconfig -o /boot/grub/grub.cfg
+		${CHROOT_DIR}/enter-chroot grub-install --recheck --target=i386-pc "${BLOCK_DEV}"
+		${CHROOT_DIR}/enter-chroot grub-install --recheck --target=x86_64-efi --efi-directory="/boot/efi"
+		# grub-install --recheck --target=i386-pc --directory="${CHROOT_DIR}" --boot-directory="${CHROOT_DIR}/boot" "${BLOCK_DEV}"
+		# grub-install --recheck --target=x86_64-efi --directory="${CHROOT_DIR}" --boot-directory="${CHROOT_DIR}/boot" --efi-directory="${CHROOT_DIR}/boot/efi"
 		;;
 	"aarch64" )
 		${CHROOT_DIR}/enter-chroot apk add --no-progress --no-cache grub-efi
-		# ${CHROOT_DIR}/enter-chroot grub-install --recheck --target=arm64-efi --efi-directory=/boot/efi
-		grub-install --recheck --target=x86_64-efi --boot-directory="${CHROOT_DIR}/boot" --efi-directory="${CHROOT_DIR}/boot/efi"
-		${CHROOT_DIR}/enter-chroot grub-mkconfig -o /boot/grub/grub.cfg
+		${CHROOT_DIR}/enter-chroot grub-install --recheck --target=x86_64-efi --efi-directory="/boot/efi"
+		# grub-install --recheck --target=x86_64-efi --directory="${CHROOT_DIR}" --boot-directory="${CHROOT_DIR}/boot" --efi-directory="${CHROOT_DIR}/boot/efi"
 		;;
 esac
 
@@ -148,9 +146,6 @@ awk '{print $2}' /proc/mounts | grep -s "${CHROOT_DIR}" | sort -r | xargs --no-r
 
 # Disconnect Disk Image
 qemu-nbd -d "${BLOCK_DEV}" > /dev/null
-
-# Sync Disk
-sync;sync;sync;
 
 ################################################################################
 # Vagrant Box
