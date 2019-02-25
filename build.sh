@@ -112,7 +112,7 @@ export TEMP_DIR="${TEMP_DIR}"
 ./alpine-chroot-install/alpine-chroot-install
 
 # Symlink Mount Table
-ln -s /proc/self/mounts "${CHROOT_DIR}/etc/mtab"
+# ln -s /proc/self/mounts "${CHROOT_DIR}/etc/mtab"
 
 # Get Root File System UUID
 root_uuid="$(blk_uuid "${BLOCK_DEV}p3")"
