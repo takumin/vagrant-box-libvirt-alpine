@@ -45,10 +45,12 @@ done
 lsmod | grep -qs nbd || modprobe nbd
 
 # Install Required Packages
-dpkg -l | awk '{print $2}' | grep -qs '^gdisk$'      || apt-get -y --no-install-recommends install gdisk
-dpkg -l | awk '{print $2}' | grep -qs '^dosfstools$' || apt-get -y --no-install-recommends install dosfstools
-dpkg -l | awk '{print $2}' | grep -qs '^e2fsprogs$'  || apt-get -y --no-install-recommends install e2fsprogs
-dpkg -l | awk '{print $2}' | grep -qs '^pixz$'       || apt-get -y --no-install-recommends install pixz
+dpkg -l | awk '{print $2}' | grep -qs '^gdisk$'              || apt-get -y --no-install-recommends install gdisk
+dpkg -l | awk '{print $2}' | grep -qs '^dosfstools$'         || apt-get -y --no-install-recommends install dosfstools
+dpkg -l | awk '{print $2}' | grep -qs '^e2fsprogs$'          || apt-get -y --no-install-recommends install e2fsprogs
+dpkg -l | awk '{print $2}' | grep -qs '^pixz$'               || apt-get -y --no-install-recommends install pixz
+dpkg -l | awk '{print $2}' | grep -qs '^grub-pc-bin$'        || apt-get -y --no-install-recommends install grub-pc-bin
+dpkg -l | awk '{print $2}' | grep -qs '^grub-efi-amd64-bin$' || apt-get -y --no-install-recommends install grub-efi-amd64-bin
 
 # Unmount RootFs
 awk '{print $2}' /proc/mounts | grep -s "${CHROOT_DIR}" | sort -r | xargs --no-run-if-empty umount
@@ -81,25 +83,15 @@ sgdisk      -n 2::+512M -c 2:"Efi"  -t 2:ef00 "${BLOCK_DEV}"
 # Create Root Partition
 sgdisk      -n 3::-1    -c 3:"Root" -t 3:8300 "${BLOCK_DEV}"
 
-# Format EFI System Partition
-mkfs.vfat -F 32 -n "EfiFs" "${BLOCK_DEV}p2"
-
-# Format Root File System Partition
+# Root File System Partition
 mkfs.ext4 -L "RootFs" "${BLOCK_DEV}p3"
-
-# Mount Partition
 mkdir -p "${CHROOT_DIR}"
 mount "${BLOCK_DEV}p3" "${CHROOT_DIR}"
 
-# Mount EFI System Partition
+# EFI System Partition
+mkfs.vfat -F 32 -n "EfiFs" "${BLOCK_DEV}p2"
 mkdir -p "${CHROOT_DIR}/boot/efi"
 mount "${BLOCK_DEV}p2" "${CHROOT_DIR}/boot/efi"
-
-# Update Device Map
-grub-mkdevicemap
-
-ls -lah ${BLOCK_DEV}*
-ls -lah ${BUILD_DIR}
 
 ################################################################################
 # Chroot
@@ -119,10 +111,10 @@ export TEMP_DIR="${TEMP_DIR}"
 # Build Alpine Base Image
 ./alpine-chroot-install/alpine-chroot-install
 
-${CHROOT_DIR}/enter-chroot ls -lah /boot
-
 # Install Bios Boot Recode
+${CHROOT_DIR}/enter-chroot ls -lah /dev/*
 ${CHROOT_DIR}/enter-chroot grub-install --target=i386-pc "${BLOCK_DEV}"
+${CHROOT_DIR}/enter-chroot grub-mkconfig -o /boot/grub/grub.cfg
 
 # Unmount RootFs
 awk '{print $2}' /proc/mounts | grep -s "${CHROOT_DIR}" | sort -r | xargs --no-run-if-empty umount
