@@ -115,8 +115,8 @@ export TEMP_DIR="${TEMP_DIR}"
 # ln -s /proc/self/mounts "${CHROOT_DIR}/etc/mtab"
 
 # Get Root File System UUID
-root_uuid="$(blk_uuid "${BLOCK_DEV}p3")"
-uefi_uuid="$(blk_uuid "${BLOCK_DEV}p2")"
+root_uuid="$(blk_id "${BLOCK_DEV}p3" | sed -En 's/.*UUID="([^"]+)".*/\1/p')"
+uefi_uuid="$(blk_id "${BLOCK_DEV}p2" | sed -En 's/.*UUID="([^"]+)".*/\1/p')"
 
 cat > "${CHROOT_DIR}/etc/fstab" <<- __EOF__
 # <file system> <mount point>   <type>  <options>         <dump>  <pass>
